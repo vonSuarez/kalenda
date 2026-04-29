@@ -3097,45 +3097,7 @@ function selectCalDay(day) {
 document.addEventListener("DOMContentLoaded",()=>{
   setDate();renderRegions();renderCal();render();
   /* ── Sækja körfuboltagögn frá karfan.is í bakgrunni ── */
-  fetch("/api/basketball")
-    .then(r=>r.ok?r.json():null)
-    .then(d=>{
-      if(!d||!d.posts||!d.posts.length) return;
-      // Parse game results from headlines
-      const existing=new Set(EVENTS.map(e=>(e.title_is||"").toLowerCase().substring(0,30)));
-      let added=0;
-      const now=new Date();
-      const todayKey=now.getFullYear()+"-"+(now.getMonth()+1)+"-"+now.getDate();
-      d.posts.forEach(p=>{
-        const t=p.title||"";
-        // Only add if it looks like a game result (contains vs / – / sigur / vann / leikur)
-        const isGame=/–|vs\.?|sigur|vann|leikur|undanúrslit|úrslit|einvígi/i.test(t);
-        if(!isGame) return;
-        const key=t.toLowerCase().substring(0,30);
-        if(existing.has(key)) return;
-        existing.add(key);
-        EVENTS.push({
-          id: 91000+added,
-          title_is: "🏀 "+t,
-          title_en: "🏀 "+t,
-          cat:"korfubolti",
-          region:"hofud",
-          place:"Sjá karfan.is",
-          time:"",
-          price:"Sjá kki.is",
-          date:"all",
-          deild_is:"Karfan.is – nýjustu fréttir",
-          deild_en:"Karfan.is – latest news",
-          desc_is:t,
-          desc_en:t,
-          url:p.url||"https://www.karfan.is",
-          source:"karfan.is",
-          isoDates:[todayKey]
-        });
-        added++;
-      });
-      if(added>0){renderRegions();render();}
-    }).catch(()=>{});
+/* karfan.is auto-fetch fjarlægt */
 
 
 
