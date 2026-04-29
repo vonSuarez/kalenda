@@ -219,6 +219,13 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 #suggestSend{background:var(--teal);color:white}
 #suggestCancel{background:var(--border);color:var(--soft)}
 #suggestThanks{display:none;text-align:center;padding:12px 0 4px;color:var(--teal);font-size:13px;font-weight:500}
+
+@media(max-width:768px) and (orientation:landscape){
+  .th-deild,.td-deild,.th-loc,.er td:nth-child(4),.th-date,.td-date,.th-time,.er td:nth-child(5){display:table-cell}
+  .tbl{font-size:11px}
+  .ev-name{font-size:11px}
+  .wrap{padding:.25rem .5rem}
+}
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
 </head>
