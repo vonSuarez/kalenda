@@ -172,7 +172,35 @@ header{background:var(--ww);border-bottom:1.5px solid var(--border);padding:0 2r
 footer{background:var(--ww);border-top:1px solid var(--border);text-align:center;padding:1.25rem;font-size:11px;color:var(--muted);margin-top:1rem}
 
 @media(max-width:900px){.cal-sidebar{display:none}}
-@media(max-width:768px){.wrap{grid-template-columns:1fr;padding:1rem}.sidebar{position:static}header{padding:0 1rem}.hdr-search{display:none}.th-deild,.td-deild,.th-loc,.er td:nth-child(3),.th-date,.td-date{display:none}}
+@media(max-width:768px){
+  .wrap{grid-template-columns:1fr;padding:.5rem}
+  .sidebar{position:static;display:flex;flex-wrap:wrap;gap:6px;padding:.5rem 0}
+  .sb-box{width:100%}
+  .rb{font-size:12px;padding:5px 10px}
+  header{padding:0 .75rem}
+  .logo-text{font-size:18px}
+  .hdr-search{display:flex;max-width:100%}
+  #si{font-size:14px;padding:6px 10px}
+  .dt-tabs{flex-wrap:wrap}
+  .dt{font-size:12px;padding:5px 9px}
+  .cats{gap:4px}
+  .cp{font-size:12px;padding:4px 10px}
+  .th-deild,.td-deild,.th-loc,.er td:nth-child(4),.th-date,.td-date,.th-time,.er td:nth-child(5){display:none}
+  .tbl{font-size:13px}
+  .ev-name{font-size:13px;line-height:1.3}
+  .td-price{font-size:12px}
+  .sec-hd h3{font-size:14px}
+  .sb2{font-size:12px;padding:4px 8px}
+  .xr td{font-size:12px;line-height:1.4;padding:8px 6px}
+  .th-event{width:60%}
+  .th-price{width:25%}
+}
+@media(max-width:480px){
+  .tbl{font-size:12px}
+  .ev-name{font-size:12px}
+  header{padding:0 .5rem}
+  .logo-text{font-size:16px}
+}
 
 /* ── Tillaga að viðburð ── */
 #suggestBtn{background:var(--teal-bg);color:var(--teal);border:none;border-radius:20px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:400;cursor:pointer;transition:opacity .15s}
