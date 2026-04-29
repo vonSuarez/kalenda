@@ -224,6 +224,11 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 }
 
 /* ── Tillaga að viðburð ── */
+
+.free-btn{background:none;border:1.5px solid var(--border);border-radius:20px;padding:5px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--soft);cursor:pointer;transition:all .15s;white-space:nowrap}
+.free-btn.on{background:#2d7a35;border-color:#2d7a35;color:#fff}
+.free-btn:hover:not(.on){border-color:var(--soft)}
+
 #suggestBtn{background:var(--teal-bg);color:var(--teal);border:none;border-radius:20px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:400;cursor:pointer;transition:opacity .15s}
 #suggestBtn:hover{opacity:.7}
 #suggestOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center}
@@ -294,7 +299,7 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
   </aside>
 
   <div class="content">
-    <div class="top-bar">
+    <div class="top-bar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <div class="dt-tabs" id="dtTabs">
         <button class="dt" data-d="today">Í dag</button>
         <button class="dt" data-d="tomorrow">Á morgun</button>
@@ -303,6 +308,7 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
         <button class="dt" data-d="summer">☀ Sumarið 2026</button>
         <button class="dt" data-d="all">Allt</button>
       </div>
+      <button class="free-btn" id="freeBtn" onclick="toggleFree()">🟢 Ókeypis</button>
     </div>
     <div class="status-bar" id="statBar" style="display:none"><span id="statTxt"></span><span class="stat-cnt" id="statCnt"></span></div>
     <div id="updatedBar" style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:5px 0"></div>
@@ -1934,7 +1940,7 @@ const EVENTS=[
 
 ];
 
-let aR="all",aC="all",aD="week",aS="",nextId=500;
+let aR="all",aC="all",aD="week",aS="",aFree=false,nextId=500;
 
 /* ── DATE ── */
 function setDate(){
@@ -1981,6 +1987,10 @@ function filtered(){
       (aD==="month" &&(e.date==="today"||e.date==="tomorrow"||e.date==="week"||e.date==="month"||e.date==="all"||e.date==="summer"))||
       (aD==="summer"&&(e.date==="summer"||e.date==="all"));
     if(!dateMatch)return false;
+    if(aFree){
+      const p=(e.price||"").toLowerCase();
+      if(!p.includes("frjálst")&&!p.includes("ókeypis")&&!p.includes("frítt")&&!p.includes("frjálst inn"))return false;
+    }
     if(aS){
       const q=aS.toLowerCase();
       const title=(lang==="is"?e.title_is:e.title_en).toLowerCase();
@@ -2152,6 +2162,14 @@ function tableFor(occs,title,cnt){
       <tbody>${rows}</tbody>
     </table>
     </div></div>`;
+}
+
+function toggleFree(){
+  aFree=!aFree;
+  const btn=document.getElementById("freeBtn");
+  btn.classList.toggle("on",aFree);
+  btn.textContent=aFree?"🟢 Ókeypis":"🟢 Ókeypis";
+  render();
 }
 
 function render(){
