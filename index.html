@@ -231,14 +231,6 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 .free-btn.on{background:#2d7a35;border-color:#2d7a35;color:#fff}
 .free-btn:hover:not(.on){border-color:var(--soft)}
 
-.karfa-btn{background:none;border:1.5px solid var(--border);border-radius:20px;padding:5px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--soft);cursor:pointer;transition:all .15s;white-space:nowrap}
-.karfa-btn:hover{border-color:#1B3D8F;color:#1B3D8F}
-.karfa-btn.loading{opacity:.6;pointer-events:none}
-#karfaNews{background:var(--ww);border:1.5px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:12.5px;display:none}
-#karfaNews h4{margin:0 0 8px;font-size:13px;color:var(--ink)}
-#karfaNews a{color:#1B3D8F;text-decoration:none;display:block;padding:3px 0;border-bottom:1px solid var(--border)}
-#karfaNews a:last-child{border-bottom:none}
-#karfaNews a:hover{text-decoration:underline}
 
 #suggestBtn{background:var(--teal-bg);color:var(--teal);border:none;border-radius:20px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:400;cursor:pointer;transition:opacity .15s}
 #suggestBtn:hover{opacity:.7}
@@ -320,11 +312,9 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
         <button class="dt" data-d="all">Allt</button>
       </div>
       <button class="free-btn" id="freeBtn" onclick="toggleFree()">🟢 Ókeypis</button>
-      <button class="karfa-btn" id="karfaBtn" onclick="fetchKarfan()">🏀 karfan.is</button>
     </div>
     <div class="status-bar" id="statBar" style="display:none"><span id="statTxt"></span><span class="stat-cnt" id="statCnt"></span></div>
     <div id="updatedBar" style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:5px 0"></div>
-    <div id="karfaNews"></div>
     <div id="out"></div>
   </div>
 
@@ -338,6 +328,7 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
       <div class="cal-grid" id="calGrid"></div>
     </div>
     <div id="calSelLabel" style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;padding:0 4px"></div>
+    <div style="font-size:10.5px;color:var(--muted);margin-top:6px;text-align:center;padding:0 6px;line-height:1.4">Veldu dag til að sjá alla viðburði þess dags</div>
 </div>
 </div>
 
@@ -2225,32 +2216,6 @@ function tableFor(occs,title,cnt){
     </div></div>`;
 }
 
-function fetchKarfan(){
-  const btn=document.getElementById("karfaBtn");
-  const box=document.getElementById("karfaNews");
-  btn.classList.add("loading");
-  btn.textContent="⏳ Sæki...";
-  fetch("/api/basketball")
-    .then(r=>r.json())
-    .then(d=>{
-      btn.classList.remove("loading");
-      btn.textContent="🏀 karfan.is";
-      if(!d.ok||!d.posts||!d.posts.length){
-        box.style.display="block";
-        box.innerHTML="<h4>karfan.is</h4><p style=\"color:var(--muted);font-size:12px\">Engar fréttir fundust. Prófaðu að opna <a href=\"https://www.karfan.is\" target=\"_blank\">karfan.is</a> beint.</p>";
-        return;
-      }
-      box.style.display="block";
-      box.innerHTML="<h4>Nýjast á karfan.is</h4>"+d.posts.map(p=>`<a href="${p.url}" target="_blank" rel="noopener">${p.title}</a>`).join("");
-    })
-    .catch(()=>{
-      btn.classList.remove("loading");
-      btn.textContent="🏀 karfan.is";
-      box.style.display="block";
-      box.innerHTML=\`<h4>karfan.is</h4><p style="font-size:12px">Opnaðu <a href="https://www.karfan.is" target="_blank">karfan.is</a> beint fyrir nýjustu fréttir og niðurstöður.</p>\`;
-    });
-}
-
 function toggleFree(){
   aFree=!aFree;
   const btn=document.getElementById("freeBtn");
@@ -2465,6 +2430,48 @@ function selectCalDay(day) {
 /* ── INIT ── */
 document.addEventListener("DOMContentLoaded",()=>{
   setDate();renderRegions();renderCal();render();
+  /* ── Sækja körfuboltagögn frá karfan.is í bakgrunni ── */
+  fetch("/api/basketball")
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{
+      if(!d||!d.posts||!d.posts.length) return;
+      // Parse game results from headlines
+      const existing=new Set(EVENTS.map(e=>(e.title_is||"").toLowerCase().substring(0,30)));
+      let added=0;
+      const now=new Date();
+      const todayKey=now.getFullYear()+"-"+(now.getMonth()+1)+"-"+now.getDate();
+      d.posts.forEach(p=>{
+        const t=p.title||"";
+        // Only add if it looks like a game result (contains vs / – / sigur / vann / leikur)
+        const isGame=/–|vs\.?|sigur|vann|leikur|undanúrslit|úrslit|einvígi/i.test(t);
+        if(!isGame) return;
+        const key=t.toLowerCase().substring(0,30);
+        if(existing.has(key)) return;
+        existing.add(key);
+        EVENTS.push({
+          id: 91000+added,
+          title_is: "🏀 "+t,
+          title_en: "🏀 "+t,
+          cat:"korfubolti",
+          region:"hofud",
+          place:"Sjá karfan.is",
+          time:"",
+          price:"Sjá kki.is",
+          date:"all",
+          deild_is:"Karfan.is – nýjustu fréttir",
+          deild_en:"Karfan.is – latest news",
+          desc_is:t,
+          desc_en:t,
+          url:p.url||"https://www.karfan.is",
+          source:"karfan.is",
+          isoDates:[todayKey]
+        });
+        added++;
+      });
+      if(added>0){renderRegions();render();}
+    }).catch(()=>{});
+
+
 
   /* ── Sækja events.json og bæta við viðburðum ── */
   // Reyna að sækja gögn beint frá gjugg.is (Mobilitus/Vísir API)
