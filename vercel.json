@@ -1,6 +1,7 @@
 {
   "routes": [
     { "src": "/og-image.png", "dest": "/og-image.png" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ],
   "headers": [
