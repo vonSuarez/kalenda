@@ -222,13 +222,18 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 
 @media(max-width:768px) and (orientation:landscape){
   .th-deild,.td-deild,.th-loc,.er td:nth-child(4),.th-date,.td-date,.th-time,.er td:nth-child(5){display:table-cell}
-  .tbl{font-size:11px}
-  .ev-name{font-size:11px}
+  .tbl{font-size:10px;table-layout:fixed;width:100%}
+  .th-event{width:35%}
+  .th-deild{width:16%}
+  .th-date{width:13%}
+  .th-loc{display:none!important}
+  .er td:nth-child(4){display:none!important}
+  .th-time{width:10%}
+  .th-price{width:12%}
+  .th-event,.td-deild,.th-date,.td-date,.th-time,.er td:nth-child(5),.th-price,.td-price{font-size:10px}
+  .ev-name{font-size:10px;line-height:1.2}
+  .td-price,.pfree{font-size:10px}
   .wrap{padding:.25rem .5rem}
-  .th-price,.td-price{width:60px;font-size:10px}
-  .th-time{width:40px;font-size:10px}
-  .th-date{width:70px;font-size:10px}
-  .pfree{font-size:10px}
 }
 </style>
 <script defer src="/_vercel/insights/script.js"></script>
