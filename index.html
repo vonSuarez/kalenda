@@ -333,7 +333,12 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 </div>
 </div>
 
-<footer style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">© 2026 kalenda.is  <button id="suggestBtn" onclick="document.getElementById('suggestOverlay').classList.add('vis')">💡 Tillaga að viðburð</button>
+<footer style="display:flex;flex-direction:column;gap:10px;padding:1.25rem 1.5rem;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <span>© 2026 kalenda.is</span>
+    <button id="suggestBtn" onclick="document.getElementById('suggestOverlay').classList.add('vis')">💡 Tillaga að viðburð</button>
+  </div>
+  <p style="font-size:10.5px;color:var(--muted);line-height:1.6;max-width:800px;margin:0 auto;text-align:center;">Kalenda er upplýsingasíða sem grípur upplýsingar víðs vegar um veraldavefinn og setur inn á þessa heildarsíðu. Það munu reglulega eiga sér stað mistök í uppfærslum á síðuna og því er engin ábyrgð tekin á framsettu efni, hvorki á því hvort viðburðir verðir haldnir eða hvort verðið sé rétt eður ei. Við reynum þó okkar besta og vonum að fólk geti nýtt sér síðuna til að fá hugmyndir að viðburðum og upplifunum. Það er svo margt í boði!</p>
 </footer>
 
 <script>
