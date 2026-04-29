@@ -2678,10 +2678,31 @@ function filtered(){
       const dates=eventDates(e);
       return dates.includes("all")||dates.includes(_tk)||e.date===aD;
     }
-    const dateMatch=aD==="all"||e.date===aD||
-      (aD==="week"  &&(e.date==="today"||e.date==="tomorrow"||e.date==="week"||e.date==="all"))||
-      (aD==="month" &&(e.date==="today"||e.date==="tomorrow"||e.date==="week"||e.date==="month"||e.date==="all"||e.date==="summer"))||
-      (aD==="summer"&&(e.date==="summer"||e.date==="all"));
+    // Check isoDates against date filter
+    let dateMatch=false;
+    if(aD==="all"){dateMatch=true;}
+    else if(e.date===aD){dateMatch=true;}
+    else if(aD==="summer"&&(e.date==="summer"||e.date==="all")){dateMatch=true;}
+    else if(e.isoDates&&e.isoDates.length){
+      // For week/month filters, check if any isoDate falls within range
+      const _now2=new Date();_now2.setHours(0,0,0,0);
+      const _end=new Date(_now2);
+      if(aD==="week") _end.setDate(_end.getDate()+7);
+      else if(aD==="month") _end.setDate(_end.getDate()+31);
+      else if(aD==="summer") _end.setMonth(_end.getMonth()+6);
+      if(aD==="week"||aD==="month"){
+        dateMatch=e.isoDates.some(d=>{
+          const pts=d.split("-");
+          const dt=new Date(+pts[0],+pts[1]-1,+pts[2]);
+          return dt>=_now2&&dt<=_end;
+        });
+      }
+    }
+    if(!dateMatch&&(aD==="week"||aD==="month")){
+      // Fallback for old date strings
+      dateMatch=(aD==="week"&&(e.date==="today"||e.date==="tomorrow"||e.date==="week"||e.date==="all"))||
+        (aD==="month"&&(e.date==="today"||e.date==="tomorrow"||e.date==="week"||e.date==="month"||e.date==="all"||e.date==="summer"||e.date==="spring"));
+    }
     if(!dateMatch)return false;
     if(aFree){
       const p=(e.price||"").toLowerCase();
