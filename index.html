@@ -175,6 +175,12 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 
 @media(max-width:900px){.cal-sidebar{display:none}}
 @media(max-width:768px){
+  .sb-lbl-toggle{cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:6px 2px;font-size:12px;letter-spacing:.08em}
+  .sb-lbl-toggle:hover{color:var(--teal)}
+  #regionArrow{font-size:11px;transition:transform .2s;color:var(--muted)}
+  .rList-collapsed{display:none}
+  .rList-open{display:flex;flex-wrap:wrap;gap:6px;padding:.25rem 0}
+
   .wrap{grid-template-columns:1fr;padding:.5rem}
   .sidebar{position:static;display:flex;flex-wrap:wrap;gap:6px;padding:.5rem 0}
   .sb-box{width:100%}
@@ -267,8 +273,10 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 <div class="wrap">
   <aside class="sidebar">
     <div class="sb-box">
-      <div class="sb-lbl">Svæði</div>
-      <div id="rList"></div>
+      <div class="sb-lbl sb-lbl-toggle" id="regionToggle" onclick="toggleRegionList()">
+        Svæði <span id="regionArrow">▸</span>
+      </div>
+      <div id="rList" class="rList-collapsed"></div>
     </div>
   </aside>
 
@@ -1737,6 +1745,20 @@ function render(){
   }
 }
 
+function toggleRegionList(){
+  const list=document.getElementById("rList");
+  const arrow=document.getElementById("regionArrow");
+  const isOpen=list.classList.contains("rList-open");
+  if(isOpen){
+    list.classList.remove("rList-open");
+    list.classList.add("rList-collapsed");
+    arrow.textContent="▸";
+  } else {
+    list.classList.remove("rList-collapsed");
+    list.classList.add("rList-open");
+    arrow.textContent="▾";
+  }
+}
 function toggleSec(id){
   const el=document.getElementById(id);
   const arr=document.getElementById("arr-"+id);
