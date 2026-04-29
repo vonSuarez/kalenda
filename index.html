@@ -2392,7 +2392,8 @@ function sendSuggestion(){
   if(!txt){document.getElementById('suggestText').focus();return;}
   const body=encodeURIComponent('Viðburðartillaga:\n\n'+txt+(url?'\n\nTengill: '+url:''));
   const subject=encodeURIComponent('Tillaga að viðburð – kalenda.is');
-  window.location.href='mailto:vidburdir@kalenda.is?subject='+subject+'&body='+body;
+  const _r=['vilhjalmurthor','gmail.com'].join('\x40');
+  window.location.href='mailto:'+_r+'?subject='+subject+'&body='+body;
   document.getElementById('suggestThanks').style.display='block';
   setTimeout(closeSuggest,3000);
 }
