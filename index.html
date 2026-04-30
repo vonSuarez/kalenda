@@ -196,6 +196,16 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 
 @media(max-width:900px){.cal-sidebar{display:none}}
 @media(max-width:768px){
+  #mobileCal{display:block}
+  .mob-cal-panel{background:var(--ww);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px;margin:.5rem 0 .25rem}
+  .mob-cal-collapsed{display:none}
+  .mob-cal-open{display:block}
+  .mob-cal-toggle{display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:6px 2px;font-size:12px;font-weight:500;color:var(--soft);letter-spacing:.08em;width:100%;background:none;border:none;font-family:"DM Sans",sans-serif}
+  .mob-cal-toggle:hover{color:var(--teal)}
+  .mob-cal-hint{font-size:11px;color:var(--soft);margin:4px 0 6px;text-align:center}
+}
+@media(min-width:769px){#mobileCal{display:none}}
+@media(max-width:768px){
   .sb-lbl-toggle{cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:6px 2px;font-size:12px;letter-spacing:.08em}
   .sb-lbl-toggle:hover{color:var(--teal)}
   #regionArrow{font-size:11px;transition:transform .2s;color:var(--muted)}
@@ -300,6 +310,25 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 </header>
 
 <div class="wrap">
+  <div id="mobileCal" style="display:none">
+    <div class="sb-box" style="width:100%;box-sizing:border-box">
+      <button class="mob-cal-toggle" onclick="toggleMobileCal()" id="mobileCalToggle">
+        Dagatal <span id="mobileCalArrow">▸</span>
+      </button>
+      <div id="mobileCalBody" class="mob-cal-collapsed">
+        <div class="mob-cal-panel">
+          <div class="cal-head">
+            <button class="cal-nav" onclick="calNav(-1,event)">‹</button>
+            <span id="calMonthLabel2"></span>
+            <button class="cal-nav" onclick="calNav(1,event)">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid2"></div>
+        </div>
+        <div class="mob-cal-hint">👆 Veldu mánaðard. til að sjá viðburði þess dags.</div>
+      </div>
+    </div>
+  </div>
+
   <aside class="sidebar">
     <div class="sb-box">
       <div class="sb-lbl sb-lbl-toggle" id="regionToggle" onclick="toggleRegionList()">
@@ -3105,6 +3134,47 @@ function render(){
   }
 }
 
+function toggleMobileCal(){
+  const body=document.getElementById("mobileCalBody");
+  const arrow=document.getElementById("mobileCalArrow");
+  if(!body)return;
+  const isOpen=body.classList.contains("mob-cal-open");
+  if(isOpen){
+    body.classList.remove("mob-cal-open");
+    body.classList.add("mob-cal-collapsed");
+    if(arrow)arrow.textContent="▸";
+  } else {
+    body.classList.remove("mob-cal-collapsed");
+    body.classList.add("mob-cal-open");
+    if(arrow)arrow.textContent="▾";
+    // Render cal into mobile grid
+    renderMobileCal();
+  }
+}
+
+function renderMobileCal(){
+  const label2=document.getElementById("calMonthLabel2");
+  const grid2=document.getElementById("calGrid2");
+  const label1=document.getElementById("calMonthLabel");
+  const grid1=document.getElementById("calGrid");
+  if(label2&&label1)label2.innerHTML=label1.innerHTML;
+  if(grid2&&grid1)grid2.innerHTML=grid1.innerHTML;
+  // Wire up day clicks in mobile grid
+  if(grid2){
+    grid2.querySelectorAll(".cd").forEach(d=>{
+      d.onclick=function(){
+        const orig=grid1?grid1.querySelector(".cd[data-date='"+this.dataset.date+"']"):null;
+        if(orig)orig.click();
+        // Collapse after selection
+        const body=document.getElementById("mobileCalBody");
+        const arrow=document.getElementById("mobileCalArrow");
+        if(body){body.classList.remove("mob-cal-open");body.classList.add("mob-cal-collapsed");}
+        if(arrow)arrow.textContent="▸";
+      };
+    });
+  }
+}
+
 function toggleCatNav(){
   const nav=document.getElementById("catNav");
   const arrow=document.getElementById("catNavArrow");
@@ -3299,6 +3369,9 @@ function selectCalDay(day) {
 /* ── INIT ── */
 document.addEventListener("DOMContentLoaded",()=>{
   setDate();renderRegions();renderCal();render();
+  // Show mobile cal div (CSS hides on desktop)
+  const mobCal=document.getElementById("mobileCal");
+  if(mobCal)mobCal.style.display="";
   // Update cat nav after render
   function isMobile(){return window.innerWidth<=768;}
   function updateCatNav(){
