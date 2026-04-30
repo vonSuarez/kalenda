@@ -201,6 +201,8 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
   #regionArrow{font-size:11px;transition:transform .2s;color:var(--muted)}
   .rList-collapsed{display:none}
   .rList-open{display:flex;flex-wrap:wrap;gap:6px;padding:.25rem 0}
+  #catNavBox .cat-nav-list-collapsed{display:none}
+  #catNavBox .cat-nav-list-open{display:flex;flex-direction:column;gap:0;margin-top:4px}
 
   .wrap{grid-template-columns:1fr;padding:.5rem}
   .sidebar{position:static;display:flex;flex-wrap:wrap;gap:6px;padding:.5rem 0}
@@ -306,8 +308,8 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
       <div id="rList" class="rList-collapsed"></div>
     </div>
     <div class="sb-box" id="catNavBox" style="display:none">
-      <div class="sb-lbl">Flokkar</div>
-      <div id="catNav"></div>
+      <div class="sb-lbl sb-lbl-toggle" id="catNavToggle" onclick="toggleCatNav()">Flokkar <span id="catNavArrow">▸</span></div>
+      <div id="catNav" class="cat-nav-list-open"></div>
     </div>
   </aside>
 
@@ -3103,6 +3105,23 @@ function render(){
   }
 }
 
+function toggleCatNav(){
+  const nav=document.getElementById("catNav");
+  const arrow=document.getElementById("catNavArrow");
+  if(!nav)return;
+  const isOpen=nav.classList.contains("cat-nav-list-open");
+  nav._userOpened=isOpen?false:true;
+  if(isOpen){
+    nav.classList.remove("cat-nav-list-open");
+    nav.classList.add("cat-nav-list-collapsed");
+    if(arrow){arrow.style.transform="";arrow.textContent="▸";}
+  } else {
+    nav.classList.remove("cat-nav-list-collapsed");
+    nav.classList.add("cat-nav-list-open");
+    if(arrow){arrow.style.transform="rotate(90deg)";arrow.textContent="▾";}
+  }
+}
+
 function toggleRegionList(){
   const list=document.getElementById("rList");
   const arrow=document.getElementById("regionArrow");
@@ -3281,6 +3300,7 @@ function selectCalDay(day) {
 document.addEventListener("DOMContentLoaded",()=>{
   setDate();renderRegions();renderCal();render();
   // Update cat nav after render
+  function isMobile(){return window.innerWidth<=768;}
   function updateCatNav(){
     const catOrder2=["maihatidharhald","tonleikar","leikhus","safn","born","spil","utivera","stjornmal","hatid","baejarhátíð","fotbolti","handbolti","korfubolti","idrottir","adrir","namskeið","annad","syningar","fyrirlestrar"];
     const dotColors={"maihatidharhald":"#C62828","tonleikar":"#1B3D8F","leikhus":"#E65100","safn":"#558B2F","born":"#d4478a","spil":"#6A1B9A","utivera":"#00695C","stjornmal":"#1565C0","hatid":"#F57F17","baejarhátíð":"#4E342E","fotbolti":"#2E7D32","handbolti":"#1565C0","korfubolti":"#E65100","idrottir":"#00796B","adrir":"#546E7A","namskeið":"#6D4C41","annad":"#546E7A","syningar":"#7B5EA7","fyrirlestrar":"#2E7D82"};
@@ -3290,6 +3310,11 @@ document.addEventListener("DOMContentLoaded",()=>{
     const visibleCats=catOrder2.filter(k=>document.getElementById("cat-anchor-"+k));
     if(visibleCats.length===0){box.style.display="none";return;}
     box.style.display="";
+    // Collapse on mobile if currently open (don't reset user choice)
+    if(isMobile()&&nav.classList.contains("cat-nav-list-open")&&!nav._userOpened){
+      nav.classList.remove("cat-nav-list-open");
+      nav.classList.add("cat-nav-list-collapsed");
+    }
     nav.innerHTML=visibleCats.map(k=>{
       const label=tC(k);
       const color=dotColors[k]||"#8B8880";
