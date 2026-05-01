@@ -371,6 +371,9 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
         <span id="calMonthLabel"></span>
         <button class="cal-nav" onclick="calNav(1,event)">›</button>
       </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:4px;min-height:20px">
+        <button id="calAllBtn" onclick="clearCalDay()" style="display:none;font-size:10.5px;color:var(--teal);background:var(--teal-bg);border:1px solid var(--teal);border-radius:12px;padding:2px 9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">Allir dagar</button>
+      </div>
       <div class="cal-grid" id="calGrid"></div>
     </div>
     <div id="calSelLabel" style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;padding:0 4px"></div>
@@ -3400,9 +3403,23 @@ function selectCalDay(day) {
   const monName = (lang==="is"?_moISs:_moENs)[calMonth];
   const lbl = document.getElementById("calSelLabel");
   if(lbl) lbl.textContent = (lang==="is"?"Valinn dagur: ":"Selected: ")+dayName+" "+day+". "+monName+" "+calYear;
-  // deselect date tabs
   document.querySelectorAll(".dt").forEach(b=>b.classList.remove("on"));
   aD = "caldate";
+  const btn=document.getElementById("calAllBtn");
+  if(btn)btn.style.display="";
+  renderCal();
+  render();
+}
+
+function clearCalDay(){
+  selectedCalDate=null;
+  aD="week";
+  const lbl=document.getElementById("calSelLabel");
+  if(lbl)lbl.textContent="";
+  const btn=document.getElementById("calAllBtn");
+  if(btn)btn.style.display="none";
+  // Restore "Þessi vika" tab
+  document.querySelectorAll(".dt").forEach(b=>b.classList.toggle("on",b.dataset.d==="week"));
   renderCal();
   render();
 }
