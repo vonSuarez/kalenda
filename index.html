@@ -131,6 +131,8 @@ header{background:var(--ww);border-bottom:1.5px solid var(--border);padding:0 2r
 .syningar-divider{border-top:2px dashed var(--border);margin:28px 0 20px;position:relative}
 .syningar-divider::before{content:"— Sýningar úti —";position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--bg);padding:0 12px;font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .ppaid{color:var(--soft);display:block;text-align:center;width:100%}
+.ppaid-up{color:var(--soft);display:block;text-align:center;width:100%}
+.price-arrow{color:var(--teal);font-size:10px;margin-left:2px}
 .see-td{text-align:right;padding:7px 8px !important;white-space:nowrap;min-width:68px}.er td.see-td{overflow:visible}
 .sb2{background:none;border:1.5px solid var(--border2);border-radius:5px;padding:2px 7px;font-size:11px;font-family:'DM Sans',sans-serif;color:var(--soft);cursor:pointer;white-space:nowrap;transition:all .12s;display:inline-block}
 .sb2:hover{border-color:var(--teal);color:var(--teal)}
@@ -3137,10 +3139,28 @@ function tableFor(occs,title,cnt,catKey){
   const rows=occs.map(({ev:e,key})=>{
     const etitle=lang==="is"?e.title_is:e.title_en;
     const edeild=lang==="is"?e.deild_is:e.deild_en;
-    const _soldNote=e.price==="Uppselt"?"⚠️ Uppselt – engar fleiri miðar í boði. ":"";const edesc=_soldNote+(lang==="is"?e.desc_is:e.desc_en);
+    const _soldNote=e.price==="Uppselt"?"⚠️ Uppselt – engar fleiri miðar í boði. ":"";
+    const _varNote=isVariable?(lang==="is"?`Verð frá ${lowestPrice.toLocaleString("is-IS")} kr. – hærri verð kunna að gilda eftir sæti eða flokki. `:`Prices from ${lowestPrice.toLocaleString("is-IS")} ISK – higher prices may apply depending on seat or category. `):"";
+    const edesc=_soldNote+_varNote+(lang==="is"?e.desc_is:e.desc_en);
     const _fp=(e.price||"").toLowerCase();
     const isFree=_fp.includes("frjálst")||_fp.includes("ókeypis")||_fp==="frítt"||_fp.includes("frítt");
-    const isSold=e.price==="Uppselt";const eprice=isFree?"Ókeypis":isSold?"Uppselt":e.price;
+    const isSold=e.price==="Uppselt";
+    // Detect variable pricing - extract lowest price
+    function extractLowestPrice(p){
+      if(!p)return null;
+      const nums=p.replace(/\./g,"").match(/\d{3,}/g);
+      if(!nums||nums.length<2)return null; // only variable if multiple prices
+      const vals=nums.map(Number).filter(n=>n>=100&&n<1000000);
+      if(vals.length<2)return null;
+      return Math.min(...vals);
+    }
+    const lowestPrice=(!isFree&&!isSold)?extractLowestPrice(e.price):null;
+    const isVariable=lowestPrice!==null;
+    let eprice;
+    if(isFree)eprice="Ókeypis";
+    else if(isSold)eprice="Uppselt";
+    else if(isVariable)eprice=lowestPrice.toLocaleString("is-IS")+" kr.";
+    else eprice=e.price;
     const uid=e.id+"_"+(key||"x");
     return`
       <tr class="er" id="er-${uid}" onclick="toggle('${uid}')">
@@ -3149,7 +3169,7 @@ function tableFor(occs,title,cnt,catKey){
         <td class="td-date" style="font-size:11.5px;color:var(--soft);white-space:nowrap">${getDateStr(e,key)}</td>
         <td style="display:none;width:0;padding:0"></td>
         <td style="font-size:11.5px;color:var(--soft);text-align:right;white-space:nowrap">${e.time||""}</td>
-        <td class="td-price"><span class="${isFree?"pfree":e.price==="Uppselt"?"psold":"ppaid"}">${eprice}</span></td>
+        <td class="td-price"><span class="${isFree?"pfree":e.price==="Uppselt"?"psold":"ppaid"}">${eprice}${isVariable?'<span class="price-arrow">↑</span>':""}</span></td>
         <td class="see-td"><button class="sb2" id="btn-${uid}" onclick="event.stopPropagation();toggle('${uid}')">${t("seeMore")}</button></td>
       </tr>
       <tr class="xr" id="xr-${uid}">
