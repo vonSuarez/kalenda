@@ -4,15 +4,5 @@
     { "src": "/bookmarklets.html", "dest": "/bookmarklets.html" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
-  ],
-  "headers": [
-    {
-      "source": "/og-image.png",
-      "headers": [
-        { "key": "Content-Type", "value": "image/png" },
-        { "key": "Cache-Control", "value": "public, max-age=86400" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    }
   ]
 }
