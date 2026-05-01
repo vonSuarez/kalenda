@@ -3140,8 +3140,6 @@ function tableFor(occs,title,cnt,catKey){
     const etitle=lang==="is"?e.title_is:e.title_en;
     const edeild=lang==="is"?e.deild_is:e.deild_en;
     const _soldNote=e.price==="Uppselt"?"⚠️ Uppselt – engar fleiri miðar í boði. ":"";
-    const _varNote=isVariable?(lang==="is"?`Verð frá ${lowestPrice.toLocaleString("is-IS")} kr. – hærri verð kunna að gilda eftir sæti eða flokki. `:`Prices from ${lowestPrice.toLocaleString("is-IS")} ISK – higher prices may apply depending on seat or category. `):"";
-    const edesc=_soldNote+_varNote+(lang==="is"?e.desc_is:e.desc_en);
     const _fp=(e.price||"").toLowerCase();
     const isFree=_fp.includes("frjálst")||_fp.includes("ókeypis")||_fp==="frítt"||_fp.includes("frítt");
     const isSold=e.price==="Uppselt";
@@ -3156,6 +3154,8 @@ function tableFor(occs,title,cnt,catKey){
     }
     const lowestPrice=(!isFree&&!isSold)?extractLowestPrice(e.price):null;
     const isVariable=lowestPrice!==null;
+    const _varNote=isVariable?(lang==="is"?`Verð frá ${lowestPrice.toLocaleString("is-IS")} kr. – hærri verð kunna að gilda eftir sæti eða flokki. `:`Prices from ${lowestPrice.toLocaleString("is-IS")} ISK – higher prices may apply depending on seat or category. `):"";
+    const edesc=_soldNote+_varNote+(lang==="is"?e.desc_is:e.desc_en);
     let eprice;
     if(isFree)eprice="Ókeypis";
     else if(isSold)eprice="Uppselt";
