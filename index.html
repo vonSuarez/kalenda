@@ -293,7 +293,7 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 <body>
 <header>
   <div class="hdr-inner">
-    <div class="logo">
+    <div class="logo" style="cursor:pointer" onclick="resetAll()" title="Fara á forsíðu">
       <div class="logo-mark">
         <svg width="32" height="34" viewBox="0 0 32 34" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <rect x="0" y="0" width="5.5" height="34" rx="2.75" fill="#1B3D8F"/>
@@ -459,6 +459,25 @@ const T={
 function t(k){return T.ui[lang][k]||k}
 function tR(id){return T.regions[lang][id]||id}
 function tC(id){return T.cats[lang][id]||id}
+
+function resetAll(){
+  aC="all"; aR="all"; aD="week"; aS=""; aFree=false; aTim=null; selectedCalDate=null;
+  // Reset UI
+  document.querySelectorAll(".dt").forEach(b=>b.classList.toggle("on",b.dataset.d==="week"));
+  const freeBtn=document.getElementById("freeBtn");
+  if(freeBtn){freeBtn.classList.remove("on");freeBtn.textContent="🟢 Ókeypis";}
+  const calAllBtn=document.getElementById("calAllBtn");
+  if(calAllBtn)calAllBtn.style.display="none";
+  const timAllBtn=document.getElementById("timAllBtn");
+  if(timAllBtn)timAllBtn.style.display="none";
+  const calSelLbl=document.getElementById("calSelLabel");
+  if(calSelLbl)calSelLbl.textContent="";
+  const si=document.getElementById("si");
+  if(si)si.value="";
+  // Scroll to top
+  window.scrollTo({top:0,behavior:"smooth"});
+  renderRegions(); renderCal(); buildTimeGrid(); render();
+}
 
 function toggleLang(){lang=lang==="is"?"en":"is";applyLang();renderRegions();renderCal();render()}
 function applyLang(){
