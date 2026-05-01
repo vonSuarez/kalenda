@@ -481,7 +481,8 @@ function resetAll(){
   if(calSelLbl)calSelLbl.textContent="";
   const si=document.getElementById("si");
   if(si)si.value="";
-  // Scroll to top
+  // Scroll to top and clean URL
+  history.replaceState(null, "", window.location.pathname);
   window.scrollTo({top:0,behavior:"smooth"});
   renderRegions(); renderCal(); buildTimeGrid(); render();
 }
