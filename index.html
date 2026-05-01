@@ -358,8 +358,8 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
         <button class="dt" data-d="summer">☀ Sumarið 2026</button>
         <button class="dt" data-d="all">Allt</button>
       </div>
-      <button class="free-btn" id="freeBtn" onclick="toggleFree()">🟢 Ókeypis</button>
-      <button class="free-btn" id="cheapBtn" onclick="toggleCheap()">💰 Ódýrast fyrst</button>
+      <button class="free-btn" id="freeBtn" onclick="toggleFree()"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#7B2D8B;margin-right:5px;vertical-align:middle"></span>Ókeypis</button>
+      <button class="free-btn" id="cheapBtn" onclick="toggleCheap()"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#5BB8F5;margin-right:5px;vertical-align:middle"></span>Ódýrast fyrst</button>
     </div>
     <div class="status-bar" id="statBar" style="display:none"><span id="statTxt"></span><span class="stat-cnt" id="statCnt"></span></div>
     <div id="updatedBar" style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:5px 0"></div>
@@ -467,7 +467,7 @@ function resetAll(){
   // Reset UI
   document.querySelectorAll(".dt").forEach(b=>b.classList.toggle("on",b.dataset.d==="week"));
   const freeBtn=document.getElementById("freeBtn");
-  if(freeBtn){freeBtn.classList.remove("on");freeBtn.textContent="🟢 Ókeypis";}
+  if(freeBtn){freeBtn.classList.remove("on");freeBtn.innerHTML='<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#7B2D8B;margin-right:5px;vertical-align:middle"></span>Ókeypis';}
   aCheap=false;
   const cheapBtn=document.getElementById("cheapBtn");
   if(cheapBtn)cheapBtn.classList.remove("on-cheap");
