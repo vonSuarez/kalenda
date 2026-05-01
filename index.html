@@ -3107,13 +3107,23 @@ function tableFor(occs,title,cnt,catKey){
   const thTime=lang==="is"?"Kl.":"Time";
   const thPrice=lang==="is"?"Verð":"Price";
 
-  // Raða eftir tíma – "Allan daginn" og "Sjá dagskrá" fara aftast
+  // Raða fyrst eftir dagsetningu, svo tíma
+  function dateVal(key){
+    if(!key)return 99999999;
+    const p=key.split("-");
+    if(p.length===3)return parseInt(p[0])*10000+parseInt(p[1])*100+parseInt(p[2]);
+    return 99999998;
+  }
   function timeVal(t){
     if(!t||t==="Allan daginn"||t==="Sjá dagskrá"||t==="Sjá heimasíðu"||t==="Eftir samkomulagi")return 9999;
     const m=t.match(/^(\d{1,2}):(\d{2})/);
     return m?parseInt(m[1])*60+parseInt(m[2]):9998;
   }
-  occs=[...occs].sort((a,b)=>timeVal(a.ev.time)-timeVal(b.ev.time));
+  occs=[...occs].sort((a,b)=>{
+    const dA=dateVal(a.key), dB=dateVal(b.key);
+    if(dA!==dB)return dA-dB;
+    return timeVal(a.ev.time)-timeVal(b.ev.time);
+  });
 
   const rows=occs.map(({ev:e,key})=>{
     const etitle=lang==="is"?e.title_is:e.title_en;
