@@ -79,6 +79,10 @@ header{background:var(--ww);border-bottom:1.5px solid var(--border);padding:0 2r
 /* CONTENT */
 .content{min-width:0;overflow:hidden}
 /* Category nav */
+.time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:6px}
+.tg-btn{background:none;border:1px solid var(--border);border-radius:5px;padding:4px 2px;font-family:"DM Sans",sans-serif;font-size:10.5px;color:var(--soft);cursor:pointer;transition:all .12s;text-align:center}
+.tg-btn:hover{border-color:var(--teal);color:var(--teal)}
+.tg-btn.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
 .cat-nav-link{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:none;border:none;padding:2px 7px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:var(--soft);cursor:pointer;transition:all .12s;margin-bottom:0;text-decoration:none}
 .cat-nav-link:hover{background:var(--teal-bg);color:var(--teal)}
 .cat-nav-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-left:4px}
@@ -371,6 +375,11 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
     </div>
     <div id="calSelLabel" style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;padding:0 4px"></div>
     <div style="font-size:12px;color:var(--teal);margin-top:8px;text-align:center;padding:5px 8px;line-height:1.5;background:var(--teal-bg);border-radius:6px;border:1px solid var(--teal);font-weight:500">👆 Veldu mánaðardag í dagatalinu til að sjá alla viðburði þess dags.</div>
+    <div style="margin-top:10px">
+      <div class="sb-lbl" style="margin-bottom:4px">Klukkan</div>
+      <div class="time-grid" id="timeGrid"></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:5px;text-align:center;line-height:1.4">Veldu klukkan hvað og allir viðburðir þeirrar tímasetningu í dag koma upp.</div>
+    </div>
     <div style="margin-top:12px">
       <svg width="100%" viewBox="0 0 280 160" role="img" style="border-radius:8px;display:block">
         <title>Gleðilegan 1. maí 2026</title>
@@ -2919,6 +2928,15 @@ function filtered(){
         (aD==="month"&&(e.date==="today"||e.date==="tomorrow"||e.date==="week"||e.date==="month"||e.date==="all"||e.date==="summer"||e.date==="spring"));
     }
     if(!dateMatch)return false;
+    // Tímafilter
+    if(aTim){
+      const et=(e.time||"").trim();
+      if(!et||et===aTim.replace(":00","")&&false){
+        // normalize: compare HH:00 format
+      }
+      const norm=et.length===5?et:et.padStart(5,"0");
+      if(norm!==aTim&&et!==aTim)return false;
+    }
     if(aFree){
       const p=(e.price||"").toLowerCase();
       if(!p.includes("frjálst")&&!p.includes("ókeypis")&&!p.includes("frítt"))return false;
@@ -3133,6 +3151,21 @@ function render(){
       return divider+tableFor(grouped[k],tC(k),grouped[k].length,k);
     }).join("");
   }
+}
+
+// ── Time grid ──
+let aTim=null;
+function buildTimeGrid(){
+  const grid=document.getElementById("timeGrid");
+  if(!grid)return;
+  const hours=[];
+  for(let h=9;h<=24;h++)hours.push(h===24?"00:00":String(h).padStart(2,"0")+":00");
+  grid.innerHTML=hours.map(t=>`<button class="tg-btn${aTim===t?" on":""}" onclick="selTime('${t}')">${t}</button>`).join("");
+}
+function selTime(t){
+  if(aTim===t){aTim=null;}else{aTim=t;}
+  buildTimeGrid();
+  render();
 }
 
 function toggleMobileCal(){
@@ -3369,7 +3402,7 @@ function selectCalDay(day) {
 
 /* ── INIT ── */
 document.addEventListener("DOMContentLoaded",()=>{
-  setDate();renderRegions();renderCal();render();
+  setDate();renderRegions();renderCal();render();buildTimeGrid();
   // Show mobile cal div (CSS hides on desktop)
   const mobCal=document.getElementById("mobileCal");
   if(mobCal)mobCal.style.display="";
