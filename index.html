@@ -3610,7 +3610,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     nav.innerHTML=visibleCats.map(k=>{
       const label=tC(k);
       const color=dotColors[k]||"#8B8880";
-      return `<a class="cat-nav-link" href="#cat-anchor-${k}" onclick="setTimeout(()=>window.scrollBy(0,-10),10)">${label}<span class="cat-nav-dot" style="background:${color}"></span></a>`;
+      return `<a class="cat-nav-link" href="javascript:void(0)" onclick="(function(){const el=document.getElementById('cat-anchor-'+${JSON.stringify(k)});if(el){const y=el.getBoundingClientRect().top+window.scrollY-148;window.scrollTo({top:y,behavior:'smooth'});}})();return false;">${label}<span class="cat-nav-dot" style="background:${color}"></span></a>`;
     }).join("");
   }
   updateCatNav();
