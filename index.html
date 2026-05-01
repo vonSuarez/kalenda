@@ -252,6 +252,7 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 
 .free-btn{background:none;border:1.5px solid var(--border);border-radius:20px;padding:5px 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--soft);cursor:pointer;transition:all .15s;white-space:nowrap}
 .free-btn.on{background:#2d7a35;border-color:#2d7a35;color:#fff}
+.free-btn.on-cheap{background:#1B3D8F;border-color:#1B3D8F;color:#fff}
 .free-btn:hover:not(.on){border-color:var(--soft)}
 
 
@@ -358,6 +359,7 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
         <button class="dt" data-d="all">Allt</button>
       </div>
       <button class="free-btn" id="freeBtn" onclick="toggleFree()">🟢 Ókeypis</button>
+      <button class="free-btn" id="cheapBtn" onclick="toggleCheap()">💰 Ódýrast fyrst</button>
     </div>
     <div class="status-bar" id="statBar" style="display:none"><span id="statTxt"></span><span class="stat-cnt" id="statCnt"></span></div>
     <div id="updatedBar" style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:5px 0"></div>
@@ -466,6 +468,9 @@ function resetAll(){
   document.querySelectorAll(".dt").forEach(b=>b.classList.toggle("on",b.dataset.d==="week"));
   const freeBtn=document.getElementById("freeBtn");
   if(freeBtn){freeBtn.classList.remove("on");freeBtn.textContent="🟢 Ókeypis";}
+  aCheap=false;
+  const cheapBtn=document.getElementById("cheapBtn");
+  if(cheapBtn)cheapBtn.classList.remove("on-cheap");
   const calAllBtn=document.getElementById("calAllBtn");
   if(calAllBtn)calAllBtn.style.display="none";
   const timAllBtn=document.getElementById("timAllBtn");
@@ -2901,7 +2906,7 @@ const EVENTS=[
   {id:31732,title_is:"Grindavik Volcano Boost – 5/20/50 km",title_en:"Grindavik Volcano Boost – 5/20/50 km",cat:"utivera",region:"sudurnes",place:"Grindavík",time:"09:00",price:"Sjá hlaup.is",date:"summer",deild_is:"Hlaup – Utanvegahlaup – 5, 20 og 50 km",deild_en:"Running – Utanvegahlaup – 5, 20 og 50 km",desc_is:"Grindavik Volcano Boost – 5/20/50 km. Sjá nánar og skrá sig á hlaup.is.",desc_en:"Grindavik Volcano Boost – 5/20/50 km. See details and register at hlaup.is.",url:"https://hlaup.is/vidburdir/grindavik-volcano-boost-12-08-2026/",source:"hlaup.is",isoDates:["2026-8-12"]},
 ];
 
-let aR="all",aC="all",aD="week",aS="",aFree=false,nextId=500;
+let aR="all",aC="all",aD="week",aS="",aFree=false,aCheap=false,nextId=500;
 
 /* ── DATE ── */
 function setDate(){
@@ -3120,6 +3125,10 @@ function tableFor(occs,title,cnt,catKey){
     return m?parseInt(m[1])*60+parseInt(m[2]):9998;
   }
   occs=[...occs].sort((a,b)=>{
+    if(aCheap){
+      const pA=priceNum(a.ev.price), pB=priceNum(b.ev.price);
+      if(pA!==pB)return pA-pB;
+    }
     const dA=dateVal(a.key), dB=dateVal(b.key);
     if(dA!==dB)return dA-dB;
     return timeVal(a.ev.time)-timeVal(b.ev.time);
@@ -3175,6 +3184,21 @@ function tableFor(occs,title,cnt,catKey){
       <tbody>${rows}</tbody>
     </table>
     </div></div>`;
+}
+
+function priceNum(p){
+  if(!p)return 9999999;
+  const lp=p.toLowerCase();
+  if(lp.includes("ókeypis")||lp.includes("frjálst")||lp==="frítt")return 0;
+  const m=p.replace(/\./g,"").match(/(\d+)/);
+  return m?parseInt(m[1]):9999999;
+}
+
+function toggleCheap(){
+  aCheap=!aCheap;
+  const btn=document.getElementById("cheapBtn");
+  btn.classList.toggle("on-cheap",aCheap);
+  render();
 }
 
 function toggleFree(){
