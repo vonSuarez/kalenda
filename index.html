@@ -62,7 +62,7 @@ header{background:var(--ww);border-bottom:1.5px solid var(--border);padding:0 2r
 .wrap{max-width:1440px;margin:0 auto;padding:1.5rem 2rem;display:grid;grid-template-columns:170px minmax(0,1fr) 180px;gap:1.75rem;align-items:start}
 
 /* SIDEBAR */
-.sidebar{position:sticky;top:136px;display:flex;flex-direction:column;gap:10px}
+.sidebar{position:sticky;top:150px;display:flex;flex-direction:column;gap:10px}
 .sb-box{background:var(--ww);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px}
 .sb-lbl{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--teal);font-weight:600;margin:-10px -10px 8px;padding:7px 12px;background:var(--teal-bg);border-bottom:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0}
 .rb{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:none;border:none;padding:2px 7px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:var(--soft);cursor:pointer;transition:all .12s;margin-bottom:0}
@@ -77,7 +77,7 @@ header{background:var(--ww);border-bottom:1.5px solid var(--border);padding:0 2r
 .sports-link:hover{opacity:.7;text-decoration:underline}
 
 /* CONTENT */
-.content{min-width:0;overflow:hidden}
+.content{min-width:0}
 /* Category nav */
 .time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:6px}
 .tg-btn{background:none;border:1px solid var(--border);border-radius:5px;padding:5px 3px;font-family:"DM Sans",sans-serif;font-size:11px;color:var(--ink);cursor:pointer;transition:all .12s;text-align:center;font-weight:500}
@@ -87,7 +87,7 @@ header{background:var(--ww);border-bottom:1.5px solid var(--border);padding:0 2r
 .cat-nav-link:hover{background:var(--teal-bg);color:var(--teal)}
 .cat-nav-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-left:4px}
 #catNav{display:flex;flex-direction:column;gap:0;margin-top:2px}
-.top-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;position:sticky;top:80px;z-index:90;background:var(--cream);padding:6px 0 6px;border-bottom:1px solid var(--border)}
+.top-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .dt-tabs{display:flex;background:var(--ww);border:1.5px solid var(--border);border-radius:8px;padding:2px;gap:2px}
 .dt{background:none;border:none;padding:5px 11px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:var(--muted);cursor:pointer;transition:all .12s}
 .dt:hover{color:var(--ink)}
@@ -178,7 +178,7 @@ header{background:var(--ww);border-bottom:1.5px solid var(--border);padding:0 2r
 .db-hat{background:#fef5e4;color:#b86e0f}
 
 .no-res{background:var(--ww);border:1.5px solid var(--border);border-radius:var(--radius);text-align:center;padding:2.5rem;color:var(--muted);font-size:13px}
-.cal-sidebar{position:sticky;top:140px}.cal-panel{background:var(--ww);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px}
+.cal-sidebar{position:sticky;top:154px}.cal-panel{background:var(--ww);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px}
 .cal-head{display:flex;align-items:center;justify-content:space-between;margin:-10px -10px 8px;padding:7px 12px;background:var(--teal-bg);border-bottom:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0}
 .cal-head span{font-size:10.5px;font-weight:600;color:var(--teal);letter-spacing:.09em;text-transform:uppercase}
 .cal-nav{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:2px 6px;border-radius:4px;line-height:1}
@@ -350,8 +350,8 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
     </div>
   </aside>
 
-  <div class="content">
-    <div class="top-bar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+  <div class="sticky-bar" style="position:sticky;top:80px;z-index:90;background:var(--cream);padding:6px 1rem;border-bottom:1px solid var(--border);margin:0 -1rem;">
+    <div class="top-bar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:1200px;margin:0 auto;">
       <div class="dt-tabs" id="dtTabs">
         <button class="dt" data-d="today">Í dag</button>
         <button class="dt" data-d="tomorrow">Á morgun</button>
