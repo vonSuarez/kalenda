@@ -379,6 +379,7 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
       <div class="cal-panel">
         <div class="cal-head">
           <span style="font-size:12px;font-weight:500;color:var(--ink)">Tími</span>
+          <button id="timAllBtn" onclick="selTime(null)" style="display:none;font-size:10.5px;color:var(--teal);background:var(--teal-bg);border:1px solid var(--teal);border-radius:12px;padding:2px 9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500">Allir tímar</button>
         </div>
         <div class="time-grid" id="timeGrid"></div>
       </div>
@@ -3165,9 +3166,11 @@ function buildTimeGrid(){
   const hours=[];
   for(let h=9;h<=24;h++)hours.push(h===24?"00:00":String(h).padStart(2,"0")+":00");
   grid.innerHTML=hours.map(t=>`<button class="tg-btn${aTim===t?" on":""}" onclick="selTime('${t}')">${t}</button>`).join("");
+  const allBtn=document.getElementById("timAllBtn");
+  if(allBtn)allBtn.style.display=aTim?"":"none";
 }
 function selTime(t){
-  if(aTim===t){aTim=null;}else{aTim=t;}
+  aTim=(t&&aTim===t)?null:t;
   buildTimeGrid();
   render();
 }
