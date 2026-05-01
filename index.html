@@ -3146,11 +3146,14 @@ function tableFor(occs,title,cnt,catKey){
     // Detect variable pricing - extract lowest price
     function extractLowestPrice(p){
       if(!p)return null;
+      const hasFra=p.toLowerCase().startsWith("frá ");
       const nums=p.replace(/\./g,"").match(/\d{3,}/g);
-      if(!nums||nums.length<2)return null; // only variable if multiple prices
+      if(!nums)return null;
       const vals=nums.map(Number).filter(n=>n>=100&&n<1000000);
-      if(vals.length<2)return null;
-      return Math.min(...vals);
+      if(vals.length===0)return null;
+      // Variable if: starts with "Frá" OR has multiple prices
+      if(hasFra||vals.length>=2)return Math.min(...vals);
+      return null;
     }
     const lowestPrice=(!isFree&&!isSold)?extractLowestPrice(e.price):null;
     const isVariable=lowestPrice!==null;
