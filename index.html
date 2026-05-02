@@ -320,9 +320,9 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
 <div class="sticky-bar" style="position:sticky;top:80px;z-index:90;background:var(--cream);border-bottom:1.5px solid var(--border);">
   <div style="max-width:1440px;margin:0 auto;padding:6px 2rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     <div class="dt-tabs" id="dtTabs">
-      <button class="dt" data-d="today">Í dag</button>
+      <button class="dt on" data-d="today">Í dag</button>
       <button class="dt" data-d="tomorrow">Á morgun</button>
-      <button class="dt on" data-d="week">Þessi vika</button>
+      <button class="dt" data-d="week">Þessi vika</button>
       <button class="dt" data-d="month">Þessi mánuður</button>
       <button class="dt" data-d="summer">☀ Sumarið 2026</button>
       <button class="dt" data-d="all">Allt</button>
@@ -428,7 +428,7 @@ function tC(id){return T.cats[lang][id]||id}
 function resetAll(){
   aC="all"; aR="all"; aD="week"; aS=""; aFree=false; aTim=null; selectedCalDate=null;
   // Reset UI
-  document.querySelectorAll(".dt").forEach(b=>b.classList.toggle("on",b.dataset.d==="week"));
+  document.querySelectorAll(".dt").forEach(b=>b.classList.toggle("on",b.dataset.d==="today"));
   const freeBtn=document.getElementById("freeBtn");
   if(freeBtn){freeBtn.classList.remove("on");freeBtn.innerHTML='<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#7B2D8B;margin-right:5px;vertical-align:middle"></span>Ókeypis';}
   aCheap=false;
@@ -2960,7 +2960,7 @@ const EVENTS=[
   {id:31822,title_is:"Miðflokkurinn í Suðurnesjabæ – Vöfflukaffi",title_en:"Miðflokkurinn í Suðurnesjabæ – Vöfflukaffi",cat:"stjornmal",region:"sudurnes",place:"Iðngarðar 2, Sandgerði, Suðurnesjabær",time:"13:00",price:"Ókeypis",date:"spring",deild_is:"Kosningaviðburður – vöfflukaffi – Sandgerði",deild_en:"Kosningaviðburður – vöfflukaffi – Sandgerði",desc_is:"Miðflokkurinn í Suðurnesjabæ – Vöfflukaffi. Opinn Facebook viðburður – nánari upplýsingar á facebook.com/events.",desc_en:"Miðflokkurinn í Suðurnesjabæ – Vöfflukaffi. Open Facebook event – see facebook.com/events for details.",url:"https://www.facebook.com/events",source:"facebook/events",isoDates:["2026-5-3"]},
 ];
 
-let aR="all",aC="all",aD="week",aS="",aFree=false,aCheap=false,nextId=500;
+let aR="all",aC="all",aD="today",aS="",aFree=false,aCheap=false,nextId=500;
 
 /* ── DATE ── */
 function setDate(){
@@ -3565,13 +3565,13 @@ function selectCalDay(day) {
 
 function clearCalDay(){
   selectedCalDate=null;
-  aD="week";
+  aD="today";
   const lbl=document.getElementById("calSelLabel");
   if(lbl)lbl.textContent="";
   const btn=document.getElementById("calAllBtn");
   if(btn)btn.style.display="none";
   // Restore "Þessi vika" tab
-  document.querySelectorAll(".dt").forEach(b=>b.classList.toggle("on",b.dataset.d==="week"));
+  document.querySelectorAll(".dt").forEach(b=>b.classList.toggle("on",b.dataset.d==="today"));
   renderCal();
   render();
 }
