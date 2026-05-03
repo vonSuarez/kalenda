@@ -3302,10 +3302,12 @@ function expandToOccurrences(evs) {
         results.push({ev:e, key: dates.includes("all") ? null : selectedCalDate});
       }
     } else if(aD==="today"){
-      if(dates.includes(todayKey)) results.push({ev:e, key:todayKey});
+      if(dates.includes("all")) results.push({ev:e, key:null});
+      else if(dates.includes(todayKey)) results.push({ev:e, key:todayKey});
       else if(e.date==="today") results.push({ev:e, key:todayKey});
     } else if(aD==="tomorrow"){
-      if(dates.includes(tomorrowKey)) results.push({ev:e, key:tomorrowKey});
+      if(dates.includes("all")) results.push({ev:e, key:null});
+      else if(dates.includes(tomorrowKey)) results.push({ev:e, key:tomorrowKey});
       else if(e.date==="tomorrow") results.push({ev:e, key:tomorrowKey});
     } else if(aD==="week"){
       const matching = dates.includes("all") ? [] : weekKeys.filter(k=>dates.includes(k));
