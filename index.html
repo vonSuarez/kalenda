@@ -3189,11 +3189,13 @@ function filtered(){
       if(aD==="tomorrow") _t.setDate(_t.getDate()+1);
       const _tk=_t.getFullYear()+"-"+(_t.getMonth()+1)+"-"+_t.getDate();
       const dates=eventDates(e);
+      if(e.date==="all")return true;
       return dates.includes("all")||dates.includes(_tk)||e.date===aD;
     }
     // Check isoDates against date filter
     let dateMatch=false;
     if(aD==="all"){dateMatch=true;}
+    else if(e.date==="all"){dateMatch=true;}
     else if(e.date===aD){dateMatch=true;}
     else if(aD==="summer"&&(e.date==="summer"||e.date==="all")){dateMatch=true;}
     else if(e.isoDates&&e.isoDates.length){
