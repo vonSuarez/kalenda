@@ -21,6 +21,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kalenda – Viðburðir á Íslandi</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -199,6 +202,18 @@ header{background:var(--ww);border-bottom:1.5px solid var(--border);padding:0 2r
 @keyframes spin{to{transform:rotate(360deg)}}
 
 footer{background:var(--ww);border-top:1px solid var(--border);text-align:center;padding:1.25rem;font-size:11px;color:var(--muted);margin-top:1rem}
+/* MAP */
+#mapContainer{display:none;width:100%;height:calc(100vh - 140px);min-height:500px;position:relative}
+#map{width:100%;height:100%;border-radius:var(--radius);border:1.5px solid var(--border)}
+.map-btn{background:var(--ww);border:1.5px solid var(--border);border-radius:7px;padding:5px 13px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--soft);cursor:pointer;font-weight:500;transition:all .13s;white-space:nowrap}
+.map-btn:hover{border-color:var(--teal);color:var(--teal)}
+.map-btn.on{background:var(--teal);border-color:var(--teal);color:white}
+.leaflet-popup-content{font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;min-width:200px;max-width:280px}
+.leaflet-popup-content .pop-title{font-weight:600;color:var(--ink);font-size:13px;margin-bottom:4px}
+.leaflet-popup-content .pop-meta{font-size:11px;color:var(--muted);margin-bottom:6px}
+.leaflet-popup-content .pop-desc{font-size:11.5px;color:var(--soft);margin-bottom:8px;line-height:1.4}
+.leaflet-popup-content .pop-link{display:inline-block;background:var(--teal);color:white;border-radius:6px;padding:4px 10px;font-size:11px;text-decoration:none;font-weight:500}
+.leaflet-popup-content .pop-link:hover{background:var(--teal-dk)}
 
 @media(max-width:900px){.cal-sidebar{display:none}}
 @media(max-width:768px){
@@ -329,6 +344,7 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
     </div>
     <button class="free-btn" id="freeBtn" onclick="toggleFree()"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#7B2D8B;margin-right:5px;vertical-align:middle"></span>Ókeypis</button>
     <button class="free-btn" id="cheapBtn" onclick="toggleCheap()"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#5BB8F5;margin-right:5px;vertical-align:middle"></span>Ódýrast fyrst</button>
+    <button class="map-btn" id="mapToggleBtn" onclick="toggleMapView()">🗺 Kort</button>
   </div>
   <div class="status-bar" id="statBar" style="display:none;max-width:1440px;margin:0 auto;padding:0 2rem"><span id="statTxt"></span><span class="stat-cnt" id="statCnt"></span></div>
   <div id="updatedBar" style="font-size:11px;color:var(--muted);padding:2px 2rem;max-width:1440px;margin:0 auto"></div>
@@ -394,6 +410,10 @@ footer{background:var(--ww);border-top:1px solid var(--border);text-align:center
     </div>
 
 </div>
+</div>
+
+<div id="mapContainer" style="max-width:1440px;margin:0 auto;padding:1rem 2rem">
+  <div id="map"></div>
 </div>
 
 <footer style="display:flex;flex-direction:column;gap:10px;padding:1.25rem 1.5rem;">
@@ -3958,6 +3978,251 @@ function sendSuggestion(){
   document.getElementById('suggestThanks').style.display='block';
   setTimeout(closeSuggest,3000);
 }
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+/* ── MAP ── */
+let mapView=false, leafletMap=null, markerCluster=null;
+
+const REGION_CENTERS={
+  hofud:[64.126,-21.817],sudur:[63.842,-18.200],sudurnes:[63.981,-22.556],
+  vestur:[64.551,-22.000],vestfirdir:[65.800,-24.000],vestfjords:[65.800,-24.000],
+  vesturfjords:[65.800,-24.000],nordvestur:[65.500,-20.500],nordaustur:[65.680,-18.100],
+  austur:[65.283,-14.395],all:[64.963,-19.021]
+};
+
+const PLACE_COORDS={
+  // Reykjavík
+  "Harpa":[64.1508,-21.9310],"Harpa – Eldborg":[64.1508,-21.9310],"Harpa – Norðurljós":[64.1508,-21.9310],"Harpa – Hörpuhorn":[64.1508,-21.9310],
+  "Hallgrímskirkja":[64.1419,-21.9261],"Hallgrímskirkja, Reykjavík":[64.1419,-21.9261],
+  "Laugardalshöll":[64.1376,-21.8709],"Laugardalslaugin":[64.1376,-21.8709],"Laugardalur, Reykjavík":[64.1376,-21.8709],
+  "Gamla höfn, Reykjavík":[64.1502,-21.9394],"Ægisgarður, Reykjavík":[64.1502,-21.9394],
+  "Þingvellir þjóðgarður":[64.2556,-21.1299],"Þingvellir þjóðgarður, Suðurland":[64.2556,-21.1299],
+  "Tjarnarbíó, Reykjavík":[64.1439,-21.9419],"Komedia, Hverfisgata 54":[64.1463,-21.9329],
+  "Mengi, Óðinsgata 2, Reykjavík":[64.1451,-21.9341],"Gaukurinn, Tryggvagata 22":[64.1482,-21.9414],
+  "Miðborg Reykjavíkur":[64.1470,-21.9400],"Miðbær Reykjavíkur":[64.1470,-21.9400],
+  "Listasafn Reykjavíkur – Hafnarhús":[64.1494,-21.9373],"Fríkirkjuvegur 7, Reykjavík":[64.1432,-21.9338],
+  "Þjóðminjasafn Íslands":[64.1433,-21.9373],"Þjóðminjasafn Íslands, Reykjavík":[64.1433,-21.9373],
+  "Suðurgata 41, Reykjavík":[64.1433,-21.9373],
+  "Perlan, Reykjavík":[64.1282,-21.9156],"Öskjuhlíð, Reykjavík":[64.1282,-21.9156],
+  "Sæbraut, Reykjavík":[64.1498,-21.9242],"Grandagarður, Reykjavík":[64.1536,-21.9502],
+  "Grandagarður 2":[64.1536,-21.9502],"Grandagarður 2, Reykjavík":[64.1536,-21.9502],
+  "Iðnó, Reykjavík":[64.1435,-21.9370],"Fríkirkjan við Tjörn":[64.1435,-21.9370],
+  "Árbær":[64.1149,-21.8349],"Kistuhylur 4, Reykjavík":[64.1149,-21.8349],
+  "Laugarnestangi, Reykjavík":[64.1400,-21.8600],
+  "Aðalstræti 2, Reykjavík":[64.1464,-21.9422],
+  "Háskólabíó / Harpa":[64.1508,-21.9310],"Háskóli Íslands, Reykjavík":[64.1393,-21.9481],
+  "Elliðaárdalur, Reykjavík":[64.1249,-21.8720],
+  "Grótta, Seltjarnarnes":[64.1664,-22.0064],"Suðurströnd 1, Seltjarnarnes":[64.1664,-22.0064],
+  "Heiðmörk, Reykjavík":[64.0935,-21.9012],"Borgarlínan, Reykjavík":[64.1268,-21.9418],
+  "Hallgrímstorg, Reykjavík":[64.1419,-21.9261],
+  // Kópavogur
+  "Sky Lagoon, Kársnes, Kópavogur":[64.1032,-21.9562],"Gerðuberg Menningarmiðstöð":[64.1085,-21.8986],
+  "Borgarholtsbraut 8, Kópavogur":[64.1093,-21.9041],"Salahverfi, Kópavogur":[64.1093,-21.9041],
+  "Fannborg 1, Garðabær":[64.0847,-21.9397],"Álftanes":[64.0700,-22.0600],
+  "Austurbergi 4, Reykjavík":[64.1080,-21.9000],
+  // Hafnarfjörður
+  "Hafnarfjörður":[64.0672,-21.9551],"Herjólfsgata 10, Hafnarfjörður":[64.0672,-21.9551],
+  // Mosfellsbær
+  "Þverholt 2, Mosfellsbær":[64.1663,-21.6955],"Mosfellsbær":[64.1663,-21.6955],
+  "Fellin í Mosfellsbæ (mismunandi)":[64.1663,-21.6955],
+  // Suðurland
+  "Bláa lónið, Grindavík":[63.8802,-22.4483],"Bláa lónið, Reykjanes":[63.8802,-22.4483],
+  "Þingvellir":[64.2556,-21.1299],"Gullfoss, Suðurland":[64.3274,-20.1197],
+  "Haukadalur, Suðurland":[64.3117,-20.3022],"Geysir":[64.3117,-20.3022],
+  "Laugarvatn, Suðurland":[64.2203,-20.7292],"Fontana":[64.2203,-20.7292],
+  "Seljalandsfoss, Suðurland":[63.6156,-19.9900],"Skógafoss, Suðurland":[63.5320,-19.5114],
+  "Reynisfjara, Vík í Mýrdal":[63.4049,-19.0439],"Vík í Mýrdal":[63.4193,-18.9975],
+  "Dyrhólaey, Suðurland":[63.4013,-19.1289],"Jökulsárlón, Suðurland":[64.0484,-16.1800],
+  "Skaftafell, Suðurausturland":[64.0167,-16.9667],"Skaftafell, Vatnajökulsþjóðgarður":[64.0167,-16.9667],
+  "Þórsmörk, Suðurland":[63.6833,-19.5167],"Landmannalaugar, Hálendi":[63.9917,-19.0672],
+  "Landmannalaugar, Háendi":[63.9917,-19.0672],"Fjaðrárgljúfur, Suðurland":[63.7693,-18.1716],
+  "Flúðir, Suðurland":[64.1311,-20.3283],"Hveragerði":[64.0027,-21.1769],
+  "Reykjadalur, Hveragerði":[64.0400,-21.1400],"Hengill, Hveragerði":[64.0400,-21.0000],
+  "Stokkseyri, Árborg":[63.8334,-20.8936],"Eyjafjallajökull, Suðurland":[63.6311,-19.6147],
+  "Mýrdalsjökull, Suðurland":[63.5600,-19.2300],"Hekla, Suðurland":[63.9826,-19.7036],
+  "Þjórsárdalur, Suðurland":[64.0400,-19.9500],"Þórsmörk":[63.6833,-19.5167],
+  // Suðurnes
+  "Reykjanesbær":[63.9815,-22.5566],"Keflavík":[63.9815,-22.5566],
+  "Ásvellir 2, Reykjanesbær":[63.9815,-22.5566],"Garður, Suðurnes":[64.0792,-22.6842],
+  "Sandgerði, Suðurnes":[64.0403,-22.7213],"Grindavík":[63.8439,-22.4342],
+  "Reykjanes, Suðurnes":[63.8185,-22.7109],"Reykjanes":[63.8185,-22.7109],
+  "Kleifarvatn, Reykjanes":[63.9312,-22.0578],"Krísuvík, Reykjanes":[63.8867,-22.0567],
+  // Vesturland
+  "Borgarnes":[64.5392,-21.9196],"Brákarbraut 13–15, Borgarnes":[64.5392,-21.9196],
+  "Reykholt, Borgarfjörður":[64.6663,-21.2986],"Krauma":[64.6663,-21.2986],
+  "Hraunfossar":[64.7126,-21.0564],"Hvalfjörður, Vesturland":[64.3700,-21.5500],
+  "Stykkishólmur, Snæfellsnes":[65.0773,-22.7284],"Grundarfjörður, Snæfellsnes":[64.9238,-23.2389],
+  "Grundarfjörður":[64.9238,-23.2389],"Snæfellsnes":[64.8679,-23.7792],
+  "Djúpalón, Snæfellsnes":[64.7493,-23.9044],"Arnarstapi, Snæfellsnes":[64.7671,-23.6214],
+  "Búðir, Snæfellsnes":[64.8147,-23.3839],"Lóndrangar, Snæfellsnes":[64.7379,-23.8025],
+  "Gerðuberg, Snæfellsnes":[64.8810,-22.6800],"Vatnshellir":[64.7500,-23.7500],
+  // Vestfirðir
+  "Ísafjörður":[66.0727,-23.1393],"Ísafjörður, Vestfirðir":[66.0727,-23.1393],
+  "Hólmavík, Strandabyggð":[65.7053,-21.6770],"Hólmavík, Vestfirðir":[65.7053,-21.6770],
+  "Dynjandi, Vestfirðir":[65.7381,-23.1014],"Látrabjarg, Vestfirðir":[65.5000,-24.5000],
+  "Rauðasandur, Vestfirðir":[65.5600,-24.1100],"Drangsnes, Vestfirðir":[65.6919,-21.4422],
+  "Ísafjarðardjúp, Vestfirðir":[66.0727,-23.1393],"Hrafnseyri, Arnarfjörður":[65.7700,-23.4500],
+  "Selárdalur, Arnarfjörður":[65.8000,-23.6000],
+  // Norðurland
+  "Akureyri":[65.6885,-18.1262],"Akureyri, Norðurland":[65.6885,-18.1262],
+  "Akureyrarkirkja":[65.6837,-18.1084],"Lystigarðurinn, Akureyri":[65.6885,-18.1262],
+  "Hlíðarfjall, Akureyri":[65.6500,-18.2500],"Hlíðarfjall – Kjarnaskógur, Akureyri":[65.6500,-18.2500],
+  "Húsavík":[66.0446,-17.3392],"Húsavík, Norðurland":[66.0446,-17.3392],"Húsavík, Þingeyjarsýsla":[66.0446,-17.3392],
+  "Vitaslóð 1, Húsavík":[66.0446,-17.3392],
+  "Mývatn, Norðurland":[65.6003,-17.0037],"Mývatn":[65.6003,-17.0037],
+  "Mývatn, Norðurland":[65.6003,-17.0037],"Jarðbaðshólar, Mývatn":[65.6264,-16.8745],
+  "Mývatn Nature Baths, Jarðbaðsvegur 1":[65.6264,-16.8745],
+  "Námafjall, Mývatn":[65.6380,-16.8220],"Dimmuborgir, Mývatn":[65.5869,-17.0039],
+  "Grjótagjá, Mývatn":[65.6246,-17.0048],"Krafla, Norðurland":[65.7167,-16.7667],
+  "Goðafoss, Þingeyjarsveit, Norðurland eystra":[65.6825,-17.5505],"Goðafoss, Norðurland":[65.6825,-17.5505],
+  "Ásbyrgi, Norðurland":[66.0167,-16.5167],"Dettifoss":[65.8144,-16.3842],
+  "Jökulsárgiljar, Norðurland":[65.8144,-16.3842],"Aldeyjarfoss, Norðurland":[65.2833,-17.4000],
+  "Hofsós, Skagafjörður":[65.8997,-19.4170],"Grettislaug, Skagi":[65.9700,-20.5000],
+  "Sauðárkrókur, Skagafjörður":[65.7456,-19.6414],"Hólar í Hjaltadal":[65.6086,-19.3461],
+  "Hvammstangi, Húnaþing vestra":[65.3952,-20.9450],"Vatnsnes, Húnaþing":[65.5000,-20.7000],
+  "Hvítserkur, Vatnsnes":[65.6053,-20.6367],"Kolugljúfur, Húnaþing":[65.3486,-20.3058],
+  "Siglufjörður":[66.1524,-18.9052],"Snorragata 10, Siglufjörður":[66.1524,-18.9052],
+  "Svalbarðseyri (10 mín frá Akureyri)":[65.7500,-18.1500],"Blönduós":[65.6600,-20.2900],
+  "Grímsey, Norðurland":[66.5453,-18.0200],"Tjörnes, Norðurland":[66.2000,-17.1000],
+  "Hauganes, Eyjafjörður":[65.8000,-18.3000],"Húnavatnssveit, Norðurland":[65.3000,-20.5000],
+  "Vatnsdalshólar, Húnaþing":[65.3700,-20.2500],
+  // Austurland
+  "Egilsstaðir":[65.2671,-14.3948],"Tjarnarbraut 15, Egilsstaðir":[65.2671,-14.3948],
+  "Urriðavatn, Egilsstaðir":[65.2671,-14.3948],"Lagarfljót, Austurland":[65.2300,-14.8000],
+  "Hallormsstaður, Austurland":[65.1200,-14.8000],"Hallormsstaður, Lagarfljót, Austurland":[65.1200,-14.8000],
+  "Borgarfjörður Eystri, Austurland":[65.5200,-13.8100],"Stöðvarfjörður, Austurland":[64.8300,-13.9000],
+  "Lónsöræfi, Austurland":[64.6200,-14.7000],"Þjórsárdalur":[64.0400,-19.9500],
+  "Fljótsdalur":[65.2000,-14.5000],"Neskaupstaður, Norðfjörður, Austurland":[65.1429,-13.7155],
+  // Vestmannaeyjar
+  "Herjólfsdalur, Vestmannaeyjar":[63.4380,-20.2700],"Vestmannaeyjar":[63.4380,-20.2700],
+  // General
+  "Víðs vegar um land":[64.963,-19.021],"Leggur af stað frá Reykjavík":[64.1265,-21.8174],
+  "Nálægt Reykjavík":[64.1265,-21.8174],"Víðs vegar um Ísland":[64.963,-19.021],
+  "Ísland":[64.963,-19.021]
+};
+
+function getEventCoords(e){
+  if(e.lat&&e.lng) return [e.lat,e.lng];
+  const place=e.place||"";
+  // Try exact match
+  if(PLACE_COORDS[place]) return PLACE_COORDS[place];
+  // Try partial match
+  for(const key of Object.keys(PLACE_COORDS)){
+    if(place.includes(key)||key.includes(place.split(",")[0])) return PLACE_COORDS[key];
+  }
+  // Fall back to region center
+  const reg=e.region==="all"?"hofud":e.region;
+  return REGION_CENTERS[reg]||REGION_CENTERS.hofud;
+}
+
+const CAT_COLORS={
+  tonleikar:"#1B3D8F",leikhus:"#E65100",safn:"#558B2F",born:"#d4478a",
+  spil:"#6A1B9A",utivera:"#00695C",stjornmal:"#1565C0",hatid:"#F57F17",
+  baejarhátíð:"#4E342E",fotbolti:"#2E7D32",handbolti:"#1565C0",korfubolti:"#E65100",
+  idrottir:"#00796B",adrir:"#546E7A",namskeið:"#6D4C41",syningar:"#7B5EA7",
+  fyrirlestrar:"#2E7D82",tourist:"#C62828",nature:"#2E7D32",pools:"#0277BD",
+  maihatidharhald:"#C62828",annad:"#546E7A"
+};
+
+function makeMarkerIcon(cat){
+  const color=CAT_COLORS[cat]||"#8B8880";
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="32" viewBox="0 0 24 32">
+    <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20C24 5.4 18.6 0 12 0z" fill="${color}" stroke="white" stroke-width="1.5"/>
+    <circle cx="12" cy="12" r="5" fill="white" opacity="0.85"/>
+  </svg>`;
+  return L.divIcon({
+    html:svg,className:"",iconSize:[24,32],iconAnchor:[12,32],popupAnchor:[0,-32]
+  });
+}
+
+function initMap(){
+  if(leafletMap) return;
+  leafletMap=L.map("map",{zoomControl:true}).setView([64.963,-19.021],6);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom:19
+  }).addTo(leafletMap);
+  markerCluster=L.markerClusterGroup({
+    maxClusterRadius:60,
+    iconCreateFunction:function(cluster){
+      const count=cluster.getChildCount();
+      const size=count<10?34:count<50?40:46;
+      return L.divIcon({
+        html:`<div style="background:var(--teal);color:white;border-radius:50%;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-size:${count<10?13:11}px;font-weight:600;border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25)">${count}</div>`,
+        className:"",iconSize:[size,size],iconAnchor:[size/2,size/2]
+      });
+    }
+  });
+  leafletMap.addLayer(markerCluster);
+}
+
+function renderMap(){
+  if(!leafletMap) initMap();
+  markerCluster.clearLayers();
+  const evs=filtered();
+  const seen=new Set();
+  evs.forEach(e=>{
+    if(seen.has(e.id)) return;
+    seen.add(e.id);
+    const coords=getEventCoords(e);
+    const title=lang==="is"?e.title_is:e.title_en;
+    const desc=lang==="is"?e.desc_is:e.desc_en;
+    const deild=lang==="is"?e.deild_is:e.deild_en;
+    const shortDesc=desc?desc.substring(0,120)+(desc.length>120?"…":""):"";
+    const price=e.price||"";
+    const marker=L.marker(coords,{icon:makeMarkerIcon(e.cat)});
+    marker.bindPopup(`
+      <div class="pop-title">${title}</div>
+      <div class="pop-meta">${e.place}${e.time?" · "+e.time:""}${price?" · "+price:""}</div>
+      ${shortDesc?`<div class="pop-desc">${shortDesc}</div>`:""}
+      <a class="pop-link" href="${e.url}" target="_blank">${lang==="is"?"Fara á síðu ↗":"Visit page ↗"}</a>
+    `,{maxWidth:300});
+    markerCluster.addLayer(marker);
+  });
+  // Fit map to markers if there are any
+  if(markerCluster.getLayers().length>0){
+    try{leafletMap.fitBounds(markerCluster.getBounds().pad(0.1));}catch(err){}
+  }
+  // Invalidate size after container becomes visible
+  setTimeout(()=>leafletMap.invalidateSize(),100);
+}
+
+function toggleMapView(){
+  mapView=!mapView;
+  const btn=document.getElementById("mapToggleBtn");
+  const wrap=document.querySelector(".wrap");
+  const mapCont=document.getElementById("mapContainer");
+  btn.classList.toggle("on",mapView);
+  btn.textContent=mapView?(lang==="is"?"📋 Listi":"📋 List"):"🗺 Kort";
+  if(mapView){
+    wrap.style.display="none";
+    mapCont.style.display="block";
+    renderMap();
+  } else {
+    wrap.style.display="";
+    mapCont.style.display="none";
+  }
+}
+
+// Re-render map when filters change
+const _origRender2=typeof render==="function"?render:null;
+if(_origRender2){
+  const __patchMap=function(){
+    _origRender2();
+    if(mapView) renderMap();
+  };
+  // Will be overwritten by the existing render patch in DOMContentLoaded — handled below
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  // Patch render to also update map
+  const __baseRender=render;
+  render=function(){
+    __baseRender();
+    if(mapView) setTimeout(renderMap,50);
+  };
+});
 </script>
 </body>
 </html>
